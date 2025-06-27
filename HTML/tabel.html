@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weer API Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid black;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Laatst Gemeten Waarden</h1>
+<p>Temperatuur: <span id="temperature">Laden...</span> °C</p>
+<p>Luchtvochtigheid: <span id="humidity">Laden...</span> %</p>
+
+<h2>Kies een datumbereik</h2>
+<p>Startdatum: <input type="text" id="start_date"></p>
+<p>Einddatum: <input type="text" id="end_date"></p>
+<button id="load_table">Toon Tabel</button>
+
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>Tijdstempel</th>
+            <th>Temperatuur (°C)</th>
+            <th>Luchtvochtigheid (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dynamisch geladen data -->
+    </tbody>
+</table>
+
+<script>
+    $(function () {
+        // Instellen datepickers
+        $("#start_date, #end_date").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+
+        // Laad nieuwste waarden
+        $.getJSON('http://pi-martijn/api.php', function (data) {
+            if (data.length > 0) {
+                $('#temperature').text(data[0].Temperatuur);
+                $('#humidity').text(data[0].Humidity);
+            }
+        });
+
+        // Laad de tabel op basis van het geselecteerde datumbereik
+        $('#load_table').click(function () {
+            var startDate = $('#start_date').val();
+            var endDate = $('#end_date').val();
+
+            $.getJSON(`http://pi-martijn/api.php?start=${startDate}&end=${endDate}`, function (data) {
+                var tbody = $('#dataTable tbody');
+                tbody.empty(); // Verwijder bestaande rijen
+                
+                data.forEach(function (entry) {
+                    var row = `<tr>
+                        <td>${formatTimestamp(entry.Timestamp)}</td>
+                        <td>${entry.Temperatuur}</td>
+                        <td>${entry.hHumidity}</td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            });
+        });
+
+        // Functie om tijdstempels te formatteren
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('nl-NL') + ' ' + date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+        }
+    });
+</script>
+
+</body>
+</html>
