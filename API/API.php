@@ -24,7 +24,7 @@ try {
 // Functie om de query-tekst te maken
 function getQuery($start, $end) {
     if ($start && $end) {
-        return "SELECT * FROM Data WHERE Timestamp >= :start AND Timestamp <= :end ORDER BY Timestamp DESC LIMIT 10";
+        return "SELECT * FROM Data WHERE Timestamp >= :start AND Timestamp <= :end ORDER BY Timestamp DESC LIMIT 100";
     } else {
         return "SELECT * FROM Data ORDER BY Timestamp DESC LIMIT 1";
     }
